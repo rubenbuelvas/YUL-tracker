@@ -1,10 +1,9 @@
 package main
 
 import (
-	"yul-tracker/api"
-	"yul-tracker/config"
-	"yul-tracker/repository"
-	"yul-tracker/service"
+	"github.com/rubenbuelvas/yul-tracker/src/api/config"
+	"github.com/rubenbuelvas/yul-tracker/src/api/presentation/routes"
+	"github.com/rubenbuelvas/yul-tracker/src/api/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,13 +15,13 @@ func main() {
 	config.LoadConfig()
 
 	// Initialize repositories
-	repo := repository.NewRepository()
+	//repo := repository.NewRepository()
 
 	// Initialize services
-	svc := service.NewService(repo)
+	flightsService := service.NewFlightsService()
 
 	// Initialize API routes
-	api.SetupRoutes(r, svc)
+	routes.SetupRoutes(r, flightsService)
 
 	// Run the server
 	r.Run()

@@ -1,7 +1,7 @@
 package repository
 
 type Repository struct {
-	// Define your repository dependencies here
+	// Use scrapper client
 }
 
 func NewRepository() *Repository {
