@@ -14,5 +14,5 @@ func SetupRoutes(r *gin.Engine, flight_service *service.FlightsService) {
 	r.GET("/ping", pingHandler.GetPing)
 
 	flightsGroup := r.Group("/flights")
-	flightsGroup.GET("/next", flightsHandler.GetNextFlight)
+	flightsGroup.GET("/next_arrival", flightsHandler.GetNextArrival)
 }

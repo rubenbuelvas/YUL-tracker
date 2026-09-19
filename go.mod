@@ -1,13 +1,16 @@
 module github.com/rubenbuelvas/yul-tracker
 
-go 1.23.0
+go 1.25.0
 
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/spf13/viper v1.21.0
 )
 
+require github.com/andybalholm/cascadia v1.3.4 // indirect
+
 require (
+	github.com/PuerkitoBio/goquery v1.13.0
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -29,10 +32,10 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
-	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

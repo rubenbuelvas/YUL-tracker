@@ -14,7 +14,6 @@ func NewFlightsHandler(flightsService *service.FlightsService) *FlightsHandler {
 	return &FlightsHandler{flightsService: flightsService}
 }
 
-func (h *FlightsHandler) GetNextFlight(c *gin.Context) {
-	flight := h.flightsService.GetLanding()
-	c.JSON(200, flight)
+func (h *FlightsHandler) GetNextArrival(c *gin.Context) {
+	c.JSON(200, h.flightsService.GetNextArrival())
 }

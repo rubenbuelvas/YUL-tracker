@@ -3,14 +3,17 @@ package service
 import (
 	"github.com/rubenbuelvas/yul-tracker/src/api/domain/consts"
 	"github.com/rubenbuelvas/yul-tracker/src/api/domain/models"
+	"github.com/rubenbuelvas/yul-tracker/src/api/presentation/repositories"
 )
 
 type FlightsService struct {
-	// Use repository
+	yulRepository *repositories.YulRepository
 }
 
-func NewFlightsService() *FlightsService {
-	return &FlightsService{}
+func NewFlightsService(yulRepository *repositories.YulRepository) *FlightsService {
+	return &FlightsService{
+		yulRepository: yulRepository,
+	}
 }
 
 func (fs *FlightsService) GetLanding() models.Flight {
@@ -23,4 +26,8 @@ func (fs *FlightsService) GetLanding() models.Flight {
 		LocationStatus:           consts.LocationStatusScheduled,
 		TimeStatus:               consts.TimeStatusOnTime,
 	}
+}
+
+func (fs *FlightsService) GetNextArrival() string {
+	return fs.yulRepository.GetNextArrival()
 }
