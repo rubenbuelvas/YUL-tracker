@@ -1,12 +1,11 @@
 package clients
 
 import (
-	"fmt"
-	"io"
-	"log"
-	"net/http"
+	"context"
+	"strings"
+	"time"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/chromedp/chromedp"
 	"github.com/spf13/viper"
 )
 
@@ -19,35 +18,60 @@ func NewYulScrapper() *YulScrapper {
 
 func (ys *YulScrapper) GetNextArrival() string {
 	url := viper.GetString("YUL_ARRIVALS_URL")
-	client := &http.Client{}
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", false),
+		//chromedp.Flag("disable-gpu", true),
+		//chromedp.Flag("no-sandbox", true),
+		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+	)
 
-	req, err := http.NewRequest("GET", url, nil)
+	ctx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
+	ctx, cancel = chromedp.NewContext(ctx)
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	var flightTexts []string
+	//preferNotToAnswerButton := "//button[contains(normalize-space(.), 'I prefer not to answer')]"
+
+	jsQuery := `Array.from(document.querySelectorAll('div.today')).map(el => el.innerText.trim()).filter(t => t.length > 0)`
+
+	err := chromedp.Run(ctx,
+		// 1. Navigate to page
+		chromedp.Navigate(url),
+
+		// 2. Wait for the accept cookies button to become visible
+		chromedp.WaitVisible("#didomi-notice-agree-button", chromedp.ByID),
+		chromedp.Sleep(5*time.Second),
+
+		// 3. Click the accept cookies button
+		chromedp.Click("#didomi-notice-agree-button", chromedp.ByID),
+
+		// 2. Wait for the prefer not to answer button to become visible
+		//chromedp.WaitVisible(preferNotToAnswerButton, chromedp.ByQuery),
+
+		chromedp.Sleep(5*time.Second), // Optional: brief sleep to ensure button is interactable
+
+		// 3. Click the prefer not to answer button
+		//chromedp.Click(preferNotToAnswerButton, chromedp.ByQuery),
+
+		// 4. Wait for the main content container to load after cookies are accepted
+		chromedp.WaitVisible("div.today", chromedp.ByQuery),
+
+		// 5. Brief sleep to allow LWC components to finish rendering flight rows
+		chromedp.Sleep(200*time.Second),
+
+		// 6. Extract flight text data
+		chromedp.Evaluate(jsQuery, &flightTexts),
+		//chromedp.Sleep(1000*time.Second), // Optional: brief sleep to ensure data is captured
+	)
 	if err != nil {
-		panic(err)
+		return err.Error()
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	results := doc.Find("div").Each(func(i int, s *goquery.Selection) {
-		text := s.Text()
-		fmt.Println("Flight:", text)
-		log.Println(s.Text())
-	})
-	return results.Text()
+	return strings.Join(flightTexts, "\n")
 }
 
 func (ys *YulScrapper) GetNextDeparture() string {
