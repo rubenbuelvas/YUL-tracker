@@ -29,5 +29,8 @@ go.work.sum
 
 # Editor/IDE
 # .idea/
-# .vscode/
+.vscode/
 .aider*
+
+# Logs
+__debug_bin*
