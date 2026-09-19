@@ -1,1 +1,2 @@
-YUL_FLIGHTS_URL: ""
+YUL_ARRIVALS_URL: "https://www.admtl.com/en-CA/flights/arrivals"
+YUL_DEPARTURES_URL: "https://www.admtl.com/en-CA/flights/departures"
