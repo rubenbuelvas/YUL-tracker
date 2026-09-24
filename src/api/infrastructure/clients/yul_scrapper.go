@@ -2,6 +2,9 @@ package clients
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -33,23 +36,43 @@ func (ys *YulScrapper) GetNextArrival() string {
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	var flightTexts string
-	//preferNotToAnswerButton := "//button[contains(normalize-space(.), 'I prefer not to answer')]"
-
-	xpathSelector := `//c-osf-flights-listings//div[contains(@class, 'today')]`
-	removeElementJS := `() => {
-		const el = document.querySelector('div[class*="QSIWebResponsiveDialog"]');
-		if (el) {
-			el.remove();
-			return true;
+	var htmlSnapshot string
+	var flightTexts []string
+	jsGetShadowHTML := `(() => {
+    try {
+			const xpath = "//c-osf-flight-listing-line";
+			const snapshot = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+			const results = [];
+			for (let i = 0; i < snapshot.snapshotLength; i++) {
+				const text = snapshot.snapshotItem(i).innerText.trim();
+				if (text) {
+					results.push(text);
+				}
+			}
+			return results;
+		} catch (err) {
+			return []
 		}
-		return false;
-	}`
+	})()`
+
+	// jsGetShadowHTML := `(() => {
+	// try {
+	// 		const host = document.querySelector('c-osf-flights-listings');
+	// 		if (host && host.shadowRoot) {
+	// 			return host.shadowRoot.innerHTML || "";
+	// 		}
+	// 		if (host) {
+	// 			return host.innerHTML || "";
+	// 		}
+	// 		return "ELEMENT_NOT_FOUND";
+	// 	} catch (err) {
+	// 		return "JS_ERROR: " + err.message;
+	// 	}
+	// })()`
 
 	err := chromedp.Run(ctx,
-		// 1. Navigate to page
 		chromedp.Navigate(url),
-
+		chromedp.WaitReady("body", chromedp.ByQuery),
 		// 2. Wait for the accept cookies button to become visible
 		chromedp.WaitVisible("#didomi-notice-agree-button", chromedp.ByID),
 
@@ -57,28 +80,29 @@ func (ys *YulScrapper) GetNextArrival() string {
 		chromedp.Click("#didomi-notice-agree-button", chromedp.ByID),
 		chromedp.Sleep(1*time.Second),
 
-		// 2. Wait for the prefer not to answer button to become visible
-		chromedp.Evaluate(removeElementJS, nil),
-
-		//chromedp.Sleep(5*time.Second), // Optional: brief sleep to ensure button is interactable
-
-		// 3. Click the prefer not to answer button
-		//chromedp.Click(preferNotToAnswerButton, chromedp.ByQuery),
-
-		// 4. Wait for the main content container to load after cookies are accepted
-		chromedp.WaitVisible(xpathSelector, chromedp.BySearch),
-
-		// 5. Brief sleep to allow LWC components to finish rendering flight rows
-		//chromedp.Sleep(200*time.Second),
-
-		// 6. Extract flight text data
-		chromedp.Text(xpathSelector, &flightTexts, chromedp.BySearch),
-		//chromedp.Sleep(1000*time.Second), // Optional: brief sleep to ensure data is captured
+		// Capture full static HTML snapshot of the component
+		chromedp.Evaluate(jsGetShadowHTML, &flightTexts),
 	)
 	if err != nil {
-		return err.Error()
+		log.Fatal(err)
 	}
-	return flightTexts
+
+	// Parse static snapshot locally using Goquery (completely immune to browser DOM updates)
+	// _, err := goquery.NewDocumentFromReader(strings.NewReader(htmlSnapshot))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	fmt.Println(htmlSnapshot)
+	// doc.Find("div.today").Each(func(i int, s *goquery.Selection) {
+	// 	text := strings.TrimSpace(s.Text())
+	// 	if text != "" {
+	// 		flightTexts = append(flightTexts, text)
+	// 	}
+	// })
+
+	fmt.Printf("Extracted %d flights from static HTML snapshot!\n", len(flightTexts))
+	return strings.Join(flightTexts, "\n")
 }
 
 func (ys *YulScrapper) GetNextDeparture() string {
