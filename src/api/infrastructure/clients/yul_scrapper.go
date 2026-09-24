@@ -2,7 +2,6 @@ package clients
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -34,10 +33,18 @@ func (ys *YulScrapper) GetNextArrival() string {
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	var flightTexts []string
+	var flightTexts string
 	//preferNotToAnswerButton := "//button[contains(normalize-space(.), 'I prefer not to answer')]"
 
-	jsQuery := `Array.from(document.querySelectorAll('div.today')).map(el => el.innerText.trim()).filter(t => t.length > 0)`
+	xpathSelector := `//c-osf-flights-listings//div[contains(@class, 'today')]`
+	removeElementJS := `() => {
+		const el = document.querySelector('div[class*="QSIWebResponsiveDialog"]');
+		if (el) {
+			el.remove();
+			return true;
+		}
+		return false;
+	}`
 
 	err := chromedp.Run(ctx,
 		// 1. Navigate to page
@@ -45,33 +52,33 @@ func (ys *YulScrapper) GetNextArrival() string {
 
 		// 2. Wait for the accept cookies button to become visible
 		chromedp.WaitVisible("#didomi-notice-agree-button", chromedp.ByID),
-		chromedp.Sleep(5*time.Second),
 
 		// 3. Click the accept cookies button
 		chromedp.Click("#didomi-notice-agree-button", chromedp.ByID),
+		chromedp.Sleep(1*time.Second),
 
 		// 2. Wait for the prefer not to answer button to become visible
-		//chromedp.WaitVisible(preferNotToAnswerButton, chromedp.ByQuery),
+		chromedp.Evaluate(removeElementJS, nil),
 
-		chromedp.Sleep(5*time.Second), // Optional: brief sleep to ensure button is interactable
+		//chromedp.Sleep(5*time.Second), // Optional: brief sleep to ensure button is interactable
 
 		// 3. Click the prefer not to answer button
 		//chromedp.Click(preferNotToAnswerButton, chromedp.ByQuery),
 
 		// 4. Wait for the main content container to load after cookies are accepted
-		chromedp.WaitVisible("div.today", chromedp.ByQuery),
+		chromedp.WaitVisible(xpathSelector, chromedp.BySearch),
 
 		// 5. Brief sleep to allow LWC components to finish rendering flight rows
-		chromedp.Sleep(200*time.Second),
+		//chromedp.Sleep(200*time.Second),
 
 		// 6. Extract flight text data
-		chromedp.Evaluate(jsQuery, &flightTexts),
+		chromedp.Text(xpathSelector, &flightTexts, chromedp.BySearch),
 		//chromedp.Sleep(1000*time.Second), // Optional: brief sleep to ensure data is captured
 	)
 	if err != nil {
 		return err.Error()
 	}
-	return strings.Join(flightTexts, "\n")
+	return flightTexts
 }
 
 func (ys *YulScrapper) GetNextDeparture() string {
