@@ -17,3 +17,7 @@ func NewFlightsHandler(flightsService *service.FlightsService) *FlightsHandler {
 func (h *FlightsHandler) GetArrivals(c *gin.Context) {
 	c.JSON(200, h.flightsService.GetArrivals())
 }
+
+func (h *FlightsHandler) GetDepartures(c *gin.Context) {
+	c.JSON(200, h.flightsService.GetDepartures())
+}

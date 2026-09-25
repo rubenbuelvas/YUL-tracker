@@ -15,7 +15,7 @@ var (
 		"Scheduled": consts.LocationStatusScheduled,
 		"Cancelled": consts.LocationStatusCancelled,
 		"Arrived":   consts.LocationStatusLanded,
-		// TODO On time could be scheduled or flying, but for now we will assume that it is flying
+		// TODO All these could be scheduled or flying, but for now we will assume that it is flying
 		"On time": consts.LocationStatusFlying,
 		"Delayed": consts.LocationStatusFlying,
 		"Early":   consts.LocationStatusFlying,
@@ -23,7 +23,7 @@ var (
 	departureLocationStatusMap = map[string]consts.LocationStatus{
 		"Departed":  consts.LocationStatusFlying,
 		"Cancelled": consts.LocationStatusCancelled,
-		"On Time":   consts.LocationStatusScheduled,
+		"On time":   consts.LocationStatusScheduled,
 		"Delayed":   consts.LocationStatusScheduled,
 	}
 )

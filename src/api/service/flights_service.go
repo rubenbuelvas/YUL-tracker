@@ -18,3 +18,7 @@ func NewFlightsService(yulRepository *repositories.YulRepository) *FlightsServic
 func (fs *FlightsService) GetArrivals() []models.Flight {
 	return fs.yulRepository.GetArrivals()
 }
+
+func (fs *FlightsService) GetDepartures() []models.Flight {
+	return fs.yulRepository.GetDepartures()
+}
