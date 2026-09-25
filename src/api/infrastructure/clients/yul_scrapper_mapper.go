@@ -54,11 +54,13 @@ func MapYulFlightData(data string, type_ consts.FlightType) models.Flight {
 		flight.ArrivalTime = dataList[0]
 		flight.DepartureIATAAirportCode = strings.Split(dataList[1], "(")[1][:3]
 		flight.LocationStatus = arrivalLocationStatusMap[dataList[len(dataList)-2]]
+		flight.ArrivalIATAAirportCode = "YUL"
 	} else {
 		flight.Type = consts.FlightTypeDeparture
 		flight.DepartureTime = dataList[0]
 		flight.ArrivalIATAAirportCode = strings.Split(dataList[1], "(")[1][:3]
 		flight.LocationStatus = departureLocationStatusMap[dataList[len(dataList)-2]]
+		flight.DepartureIATAAirportCode = "YUL"
 	}
 	flight.FlightNumber = strings.Split(dataList[1], " ")[0]
 
