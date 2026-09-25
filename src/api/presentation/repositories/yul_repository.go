@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"github.com/rubenbuelvas/yul-tracker/src/api/domain/consts"
+	"github.com/rubenbuelvas/yul-tracker/src/api/domain/models"
 	"github.com/rubenbuelvas/yul-tracker/src/api/infrastructure/clients"
 )
 
@@ -14,6 +16,15 @@ func NewYulRepository(scrapperClient *clients.YulScrapper) *YulRepository {
 	}
 }
 
-func (r *YulRepository) GetNextArrival() string {
-	return r.ScrapperClient.GetNextArrival()
+func (r *YulRepository) GetArrivals() []models.Flight {
+	data, err := r.ScrapperClient.GetArrivals()
+	if err != nil {
+		// Handle error appropriately
+		return nil
+	}
+	flights := make([]models.Flight, 0, len(data))
+	for _, flight := range data {
+		flights = append(flights, clients.MapYulFlightData(flight, consts.FlightTypeArrival))
+	}
+	return flights
 }

@@ -8,6 +8,7 @@ type Flight struct {
 	ArrivalIATAAirportCode   string                `json:"arrival_iata_airport_code"`
 	DepartureTime            string                `json:"departure_time"`
 	ArrivalTime              string                `json:"arrival_time"`
+	Type                     consts.FlightType     `json:"type"`
 	LocationStatus           consts.LocationStatus `json:"location_status"`
 	TimeStatus               consts.TimeStatus     `json:"time_status"`
 }

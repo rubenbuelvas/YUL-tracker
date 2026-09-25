@@ -2,6 +2,8 @@ package clients
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -26,11 +28,12 @@ func (ys *YulScrapper) GetDepartures() ([]string, error) {
 }
 
 func (ys *YulScrapper) scrape(url string) ([]string, error) {
-	opts := append(chromedp.DefaultExecAllocatorOptions[:]) // 	chromedp.Flag("headless", false),
-	// 	chromedp.Flag("disable-gpu", true),
-	// 	chromedp.Flag("no-sandbox", true),
-	// 	chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
-	// )
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", true),
+		// 	chromedp.Flag("disable-gpu", true),
+		// 	chromedp.Flag("no-sandbox", true),
+		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+	)
 
 	ctx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
@@ -46,7 +49,7 @@ func (ys *YulScrapper) scrape(url string) ([]string, error) {
 			const snapshot = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 			const results = [];
 			for (let i = 0; i < snapshot.snapshotLength; i++) {
-				const text = snapshot.snapshotItem(i).innerText.trim();
+				const text = snapshot.snapshotItem(i).innerText;
 				if (text) {
 					results.push(text);
 				}
@@ -69,6 +72,6 @@ func (ys *YulScrapper) scrape(url string) ([]string, error) {
 		// Get data
 		chromedp.Evaluate(getFlightDataJS, &flights),
 	)
-
+	fmt.Println(strings.Split(flights[0], "\n"))
 	return flights, err
 }
