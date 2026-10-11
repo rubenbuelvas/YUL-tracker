@@ -1,5 +1,9 @@
 package consts
 
+const (
+	DATETIME_LAYOUT = "15:04"
+)
+
 type LocationStatus string
 
 const (

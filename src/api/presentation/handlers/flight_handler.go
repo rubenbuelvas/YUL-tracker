@@ -21,3 +21,12 @@ func (h *FlightsHandler) GetArrivals(c *gin.Context) {
 func (h *FlightsHandler) GetDepartures(c *gin.Context) {
 	c.JSON(200, h.flightsService.GetDepartures())
 }
+
+func (h *FlightsHandler) GetLastDeparture(c *gin.Context) {
+	flight, err := h.flightsService.GetLastDeparture("departure")
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, flight)
+}

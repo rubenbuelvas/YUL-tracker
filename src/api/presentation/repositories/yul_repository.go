@@ -16,15 +16,15 @@ func NewYulRepository(scrapperClient *clients.YulScrapper) *YulRepository {
 	}
 }
 
-func (r *YulRepository) GetArrivals() []models.Flight {
+func (r *YulRepository) GetArrivals() []*models.Flight {
 	return r.GetFlights(consts.FlightTypeArrival)
 }
 
-func (r *YulRepository) GetDepartures() []models.Flight {
+func (r *YulRepository) GetDepartures() []*models.Flight {
 	return r.GetFlights(consts.FlightTypeDeparture)
 }
 
-func (r *YulRepository) GetFlights(type_ consts.FlightType) []models.Flight {
+func (r *YulRepository) GetFlights(type_ consts.FlightType) []*models.Flight {
 	var (
 		data []string
 		err  error
@@ -38,7 +38,7 @@ func (r *YulRepository) GetFlights(type_ consts.FlightType) []models.Flight {
 		// TODO Handle error appropriately
 		return nil
 	}
-	flights := make([]models.Flight, 0, len(data))
+	flights := make([]*models.Flight, 0, len(data))
 	for _, flight := range data {
 		flights = append(flights, clients.MapYulFlightData(flight, consts.FlightTypeDeparture))
 	}

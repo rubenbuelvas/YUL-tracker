@@ -28,9 +28,9 @@ var (
 	}
 )
 
-func MapYulFlightData(data string, type_ consts.FlightType) models.Flight {
+func MapYulFlightData(data string, type_ consts.FlightType) *models.Flight {
 	// TODO: IDK if logic to map the flight data to the Flight struct should be implemented here
-	flight := models.Flight{}
+	flight := &models.Flight{}
 	// Example data:
 	// 17:16\n17:30\nUA1925 United AirlinesChicago Ohare (ORD)\nCodeshare flight(s):\nNZ9856\nNH7804\nEK6670\nCM2819\nAC3335\nArrived\nGate 80
 	dataList := strings.Split(data, "\n")
